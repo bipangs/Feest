@@ -1,0 +1,383 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  username    String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  avatar      String?
+  phone       String?
+  isVerified  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  role        UserRole @default(USER)
+  points      Int      @default(0)
+  level       Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Profile information
+  profile UserProfile?
+
+  // Food listings
+  foodListings Food[]
+
+  // Swap requests (both as requester and food owner)
+  swapRequestsAsRequester SwapRequest[] @relation("SwapRequester")
+  swapRequestsAsOwner     SwapRequest[] @relation("SwapOwner")
+
+  // Messages
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+
+  // Events
+  createdEvents      Event[]             @relation("EventCreator")
+  eventParticipants  EventParticipant[]
+
+  // Notifications
+  notifications Notification[]
+
+  // Achievements
+  userAchievements UserAchievement[]
+
+  // Pickup preferences
+  pickupPreferences PickupPreference[]
+
+  // Device tokens for push notifications
+  deviceTokens DeviceToken[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  bio               String?
+  dateOfBirth       DateTime?
+  location          String?
+  latitude          Float?
+  longitude         Float?
+  dietaryPreferences String[] // ["vegetarian", "vegan", "gluten-free", etc.]
+  allergies         String[]
+  preferredRadius   Int       @default(5) // in kilometers
+  isLocationPublic  Boolean   @default(true)
+  socialMediaLinks  Json?     // flexible JSON for various social links
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Food {
+  id            String     @id @default(cuid())
+  title         String
+  description   String
+  category      FoodCategory
+  cuisine       String?
+  images        String[]   // URLs to images
+  quantity      Int
+  unit          String     // "portions", "kg", "pieces", etc.
+  expiryDate    DateTime?
+  pickupBy      DateTime
+  isActive      Boolean    @default(true)
+  isReserved    Boolean    @default(false)
+  condition     FoodCondition @default(FRESH)
+  preparationDate DateTime?
+  ingredients   String[]
+  allergens     String[]
+  nutritionInfo Json?      // flexible nutrition information
+  tags          String[]   // searchable tags
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relationships
+  ownerId       String
+  owner         User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  swapRequests  SwapRequest[]
+  
+  // Location information
+  location      FoodLocation?
+
+  @@map("foods")
+}
+
+model FoodLocation {
+  id        String  @id @default(cuid())
+  foodId    String  @unique
+  address   String
+  city      String
+  country   String
+  zipCode   String?
+  latitude  Float
+  longitude Float
+  isPublic  Boolean @default(true)
+  
+  food Food @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  
+  @@map("food_locations")
+}
+
+model SwapRequest {
+  id           String           @id @default(cuid())
+  foodId       String
+  requesterId  String
+  ownerId      String
+  status       SwapStatus       @default(PENDING)
+  message      String?
+  proposedPickupTime DateTime?
+  actualPickupTime   DateTime?
+  rating       Int?             // 1-5 rating after completion
+  review       String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relationships
+  food      Food @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  requester User @relation("SwapRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  owner     User @relation("SwapOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Messages related to this swap
+  messages Message[]
+
+  @@map("swap_requests")
+}
+
+model Message {
+  id           String      @id @default(cuid())
+  senderId     String
+  receiverId   String
+  swapRequestId String?
+  content      String
+  messageType  MessageType @default(TEXT)
+  isRead       Boolean     @default(false)
+  attachments  String[]    // URLs to attachments
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relationships
+  sender      User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User         @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  swapRequest SwapRequest? @relation(fields: [swapRequestId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Event {
+  id              String     @id @default(cuid())
+  title           String
+  description     String
+  eventType       EventType
+  startDate       DateTime
+  endDate         DateTime
+  location        String
+  latitude        Float?
+  longitude       Float?
+  maxParticipants Int?
+  isPublic        Boolean    @default(true)
+  registrationDeadline DateTime?
+  images          String[]
+  tags            String[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Relationships
+  creatorId    String
+  creator      User                @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  participants EventParticipant[]
+
+  @@map("events")
+}
+
+model EventParticipant {
+  id         String                @id @default(cuid())
+  eventId    String
+  userId     String
+  status     ParticipationStatus   @default(REGISTERED)
+  registeredAt DateTime            @default(now())
+  
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("event_participants")
+}
+
+model PickupPreference {
+  id           String    @id @default(cuid())
+  userId       String
+  name         String    // "Home", "Work", "University", etc.
+  address      String
+  latitude     Float
+  longitude    Float
+  isDefault    Boolean   @default(false)
+  availableDays String[] // ["monday", "tuesday", etc.]
+  availableTimeStart String // "09:00"
+  availableTimeEnd   String // "18:00"
+  instructions String?   // Special pickup instructions
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("pickup_preferences")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  data      Json?            // Additional data for the notification
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Achievement {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String
+  icon        String
+  category    AchievementCategory
+  points      Int
+  condition   Json    // Flexible condition definition
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  Platform
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("device_tokens")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum FoodCategory {
+  FRUITS
+  VEGETABLES
+  GRAINS
+  PROTEIN
+  DAIRY
+  BAKED_GOODS
+  SNACKS
+  BEVERAGES
+  PREPARED_MEALS
+  LEFTOVERS
+  OTHER
+}
+
+enum FoodCondition {
+  FRESH
+  GOOD
+  NEEDS_PICKUP_SOON
+  EXPIRED_BUT_SAFE
+}
+
+enum SwapStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  LOCATION
+  SYSTEM
+}
+
+enum EventType {
+  FOOD_SHARING
+  COMMUNITY_MEAL
+  COOKING_CLASS
+  WORKSHOP
+  CLEANUP
+  OTHER
+}
+
+enum ParticipationStatus {
+  REGISTERED
+  CONFIRMED
+  ATTENDED
+  NO_SHOW
+  CANCELLED
+}
+
+enum NotificationType {
+  SWAP_REQUEST
+  SWAP_ACCEPTED
+  SWAP_REJECTED
+  SWAP_COMPLETED
+  MESSAGE_RECEIVED
+  EVENT_INVITATION
+  EVENT_REMINDER
+  ACHIEVEMENT_UNLOCKED
+  SYSTEM_UPDATE
+  FOOD_EXPIRING
+}
+
+enum AchievementCategory {
+  SHARING
+  COMMUNITY
+  SUSTAINABILITY
+  SOCIAL
+  MILESTONE
+}
+
+enum Platform {
+  IOS
+  ANDROID
+  WEB
+}

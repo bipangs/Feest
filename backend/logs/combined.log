@@ -1,0 +1,23 @@
+{"level":"info","message":"Socket.IO server configured successfully","service":"feest-backend","timestamp":"2025-06-14T07:40:56.823Z"}
+{"level":"info","message":"🚀 Feest Backend API is running on port 3000","service":"feest-backend","timestamp":"2025-06-14T07:40:56.828Z"}
+{"level":"info","message":"📖 API Documentation: http://localhost:3000/api/v1","service":"feest-backend","timestamp":"2025-06-14T07:40:56.829Z"}
+{"level":"info","message":"🌍 Environment: undefined","service":"feest-backend","timestamp":"2025-06-14T07:40:56.829Z"}
+{"level":"info","message":"Socket.IO server configured successfully","service":"feest-backend","timestamp":"2025-06-14T07:42:17.997Z"}
+{"level":"info","message":"🚀 Feest Backend API is running on port 3000","service":"feest-backend","timestamp":"2025-06-14T07:42:18.002Z"}
+{"level":"info","message":"📖 API Documentation: http://localhost:3000/api/v1","service":"feest-backend","timestamp":"2025-06-14T07:42:18.002Z"}
+{"level":"info","message":"🌍 Environment: undefined","service":"feest-backend","timestamp":"2025-06-14T07:42:18.002Z"}
+{"level":"info","message":"::1 - - [14/Jun/2025:07:42:28 +0000] \"GET /api/v1/ HTTP/1.1\" 404 93 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.4202\"","service":"feest-backend","timestamp":"2025-06-14T07:42:28.622Z"}
+{"level":"info","message":"::1 - - [14/Jun/2025:07:42:35 +0000] \"GET /health HTTP/1.1\" 200 69 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.4202\"","service":"feest-backend","timestamp":"2025-06-14T07:42:35.961Z"}
+{"level":"info","message":"Socket.IO server configured successfully","service":"feest-backend","timestamp":"2025-06-14T07:45:10.240Z"}
+{"level":"info","message":"🚀 Feest Backend API is running on port 3000","service":"feest-backend","timestamp":"2025-06-14T07:45:10.245Z"}
+{"level":"info","message":"📖 API Documentation: http://localhost:3000/api/v1","service":"feest-backend","timestamp":"2025-06-14T07:45:10.246Z"}
+{"level":"info","message":"🌍 Environment: undefined","service":"feest-backend","timestamp":"2025-06-14T07:45:10.246Z"}
+{"level":"info","message":"SIGINT received, shutting down gracefully","service":"feest-backend","timestamp":"2025-06-14T07:45:17.563Z"}
+{"level":"info","message":"Socket.IO server configured successfully","service":"feest-backend","timestamp":"2025-06-14T08:03:18.341Z"}
+{"level":"info","message":"🚀 Feest Backend API is running on port 3000","service":"feest-backend","timestamp":"2025-06-14T08:03:18.347Z"}
+{"level":"info","message":"📖 API Documentation: http://localhost:3000/api/v1","service":"feest-backend","timestamp":"2025-06-14T08:03:18.347Z"}
+{"level":"info","message":"🌍 Environment: undefined","service":"feest-backend","timestamp":"2025-06-14T08:03:18.347Z"}
+{"level":"info","message":"Socket.IO server configured successfully","service":"feest-backend","timestamp":"2025-06-14T08:10:31.034Z"}
+{"level":"info","message":"🚀 Feest Backend API is running on port 3000","service":"feest-backend","timestamp":"2025-06-14T08:10:31.041Z"}
+{"level":"info","message":"📖 API Documentation: http://localhost:3000/api/v1","service":"feest-backend","timestamp":"2025-06-14T08:10:31.042Z"}
+{"level":"info","message":"🌍 Environment: development","service":"feest-backend","timestamp":"2025-06-14T08:10:31.042Z"}
