@@ -12,7 +12,7 @@ export const setupSocketIO = (io: SocketIOServer): void => {
         return next(new Error('Authentication error'));
       }
 
-      const jwtSecret = process.env['JWT_SECRET'];
+      const jwtSecret = process.env['JWT_SECRET'] as string;
       if (!jwtSecret) {
         return next(new Error('JWT secret not configured'));
       }

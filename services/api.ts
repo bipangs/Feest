@@ -50,6 +50,79 @@ export interface UpdateProfileData {
   preferredRadius?: number;
 }
 
+export interface FoodItem {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  condition: string;
+  expiryDate?: string;
+  pickupBy: string;
+  quantity: number;
+  unit: string;
+  cuisine?: string;
+  ingredients: string[];
+  allergens: string[];
+  tags: string[];
+  images: string[];
+  isActive: boolean;
+  isReserved: boolean;
+  owner: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
+  location?: {
+    id: string;
+    address: string;
+    city: string;
+    country: string;
+    zipCode?: string;
+    latitude: number;
+    longitude: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFoodData {
+  title: string;
+  description: string;
+  category: string;
+  condition?: string;
+  expiryDate?: string;
+  pickupBy: string;
+  quantity: number;
+  unit?: string;
+  cuisine?: string;
+  ingredients?: string[];
+  allergens?: string[];
+  tags?: string[];
+  images?: string[];
+  address?: string;
+  city?: string;
+  country?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface FoodFilters {
+  category?: string;
+  search?: string;
+  location?: string;
+  condition?: string;
+  dietary?: string[];
+  radius?: number;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message: string;
+  data?: T;
+}
+
 class ApiService {
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
     try {
@@ -150,29 +223,41 @@ class ApiService {
 
     return data.data;
   }
+  // Food-related endpoints
+  async getFoodItems(filters?: FoodFilters): Promise<ApiResponse<FoodItem[]>> {
+    const queryParams = new URLSearchParams();
+    if (filters?.category) queryParams.append('category', filters.category);
+    if (filters?.search) queryParams.append('search', filters.search);
+    if (filters?.location) queryParams.append('location', filters.location);
+    if (filters?.condition) queryParams.append('condition', filters.condition);
+    if (filters?.radius) queryParams.append('radius', filters.radius.toString());
 
-  // Add food-related endpoints
-  async getFoodListings(token: string, filters?: any) {
-    const { response, data } = await this.makeRequest('/foods', {
+    const { response, data } = await this.makeRequest(`/foods?${queryParams.toString()}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
     });
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to get food listings');
+      throw new Error(data.message || 'Failed to get food items');
     }
 
-    return data.data;
+    return data;
   }
 
-  async createFoodListing(token: string, foodData: any) {
+  async getFoodById(id: string): Promise<ApiResponse<FoodItem>> {
+    const { response, data } = await this.makeRequest(`/foods/${id}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to get food item');
+    }
+
+    return data;
+  }
+
+  async createFood(foodData: CreateFoodData): Promise<ApiResponse<FoodItem>> {
     const { response, data } = await this.makeRequest('/foods', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
       body: JSON.stringify(foodData),
     });
 
@@ -180,7 +265,43 @@ class ApiService {
       throw new Error(data.message || 'Failed to create food listing');
     }
 
-    return data.data;
+    return data;
+  }
+
+  async updateFood(id: string, foodData: Partial<CreateFoodData>): Promise<ApiResponse<FoodItem>> {
+    const { response, data } = await this.makeRequest(`/foods/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(foodData),
+    });
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update food listing');
+    }
+
+    return data;
+  }
+
+  async deleteFood(id: string): Promise<ApiResponse> {
+    const { response, data } = await this.makeRequest(`/foods/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to delete food listing');
+    }
+
+    return data;
+  }
+  async getMyFoodItems(): Promise<ApiResponse<FoodItem[]>> {
+    const { response, data } = await this.makeRequest('/foods/my-foods', {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to get your food listings');
+    }
+
+    return data;
   }
 }
 
