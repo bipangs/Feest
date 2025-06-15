@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -18,9 +18,14 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
-  const { login, isLoading } = useAuth();
+    const { login, isLoading, isAuthenticated } = useAuth();
 
+  // Auto-redirect if user becomes authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/(tabs)' as any);
+    }
+  }, [isAuthenticated]);
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
@@ -29,13 +34,8 @@ export default function LoginScreen() {
 
     try {
       await login(email.toLowerCase(), password);
-      
-      Alert.alert('Success', 'Login successful!', [
-        {
-          text: 'OK',
-          onPress: () => router.replace('/(tabs)' as any),
-        },
-      ]);
+      // Direct redirect after successful login
+      router.replace('/(tabs)');
     } catch (error) {
       Alert.alert('Login Failed', error instanceof Error ? error.message : 'Something went wrong');
     }

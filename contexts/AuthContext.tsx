@@ -80,9 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Error clearing auth data:', error);
     }
-  };
-
-  const login = async (email: string, password: string) => {
+  };  const login = async (email: string, password: string) => {
     try {
       const response = await apiService.login({ email, password });
       
@@ -93,11 +91,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await storeAuthData(token, userData);
         await AsyncStorage.setItem('refreshToken', refreshToken);
         
-        // Update state
+        // Update state immediately
         setUser(userData);
         setAccessToken(token);
+        
+        console.log('Login successful, user authenticated:', userData.email);
       }
     } catch (error) {
+      console.error('Login error:', error);
       throw error;
     }
   };
