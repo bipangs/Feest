@@ -2,12 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import {
-    Alert,
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -17,28 +17,22 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isVisible, onClose }: SidebarProps) {
-  const { user, isAuthenticated, logout } = useAuth();
-
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-              onClose();            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Error', 'Failed to logout');
-            }
-          }
-        }
-      ]
-    );
+  const { user, isAuthenticated, logout } = useAuth();  const handleLogout = async () => {
+    console.log('handleLogout called directly');
+    
+    try {
+      console.log('About to call logout function immediately...');
+      console.log('isAuthenticated:', isAuthenticated);
+      console.log('user:', user);
+      
+      onClose(); // Close sidebar
+      await logout(); // Call logout directly
+      
+      console.log('Logout function completed successfully');
+    } catch (error) {
+      console.error('Logout error in sidebar:', error);
+      Alert.alert('Error', 'Failed to logout: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
   };
 
   const menuItems = [
@@ -262,9 +256,7 @@ export default function Sidebar({ isVisible, onClose }: SidebarProps) {
                   <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                 </TouchableOpacity>
               ))}
-            </View>
-
-            {/* Footer Actions */}
+            </View>            {/* Footer Actions */}
             {isAuthenticated && (
               <View style={{ 
                 padding: 20,
@@ -272,6 +264,44 @@ export default function Sidebar({ isVisible, onClose }: SidebarProps) {
                 borderTopColor: '#E5E7EB',
                 marginTop: 20
               }}>
+                {/* Test Button */}
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log('Test button pressed!');
+                    Alert.alert('Test', 'Button works!');
+                  }}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: 16,
+                    paddingHorizontal: 16,
+                    borderRadius: 12,
+                    backgroundColor: '#F0F9FF',
+                    marginBottom: 12
+                  }}
+                >
+                  <View style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: '#DBEAFE',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 16
+                  }}>
+                    <Ionicons name="bug-outline" size={20} color="#3B82F6" />
+                  </View>
+                  <Text style={{ 
+                    fontSize: 16, 
+                    fontWeight: '500', 
+                    color: '#3B82F6',
+                    flex: 1
+                  }}>
+                    Test Button
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Logout Button */}
                 <TouchableOpacity
                   onPress={handleLogout}
                   style={{

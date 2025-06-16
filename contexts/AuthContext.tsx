@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { apiService } from '../services/api';
 
@@ -73,14 +74,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Error storing auth data:', error);
     }
   };
-
   const clearAuthData = async () => {
     try {
+      console.log('Clearing AsyncStorage data...');
       await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
+      console.log('AsyncStorage cleared successfully');
     } catch (error) {
       console.error('Error clearing auth data:', error);
+      // Try to clear items individually if multiRemove fails
+      try {
+        await AsyncStorage.removeItem('accessToken');
+        await AsyncStorage.removeItem('refreshToken');
+        await AsyncStorage.removeItem('user');
+        console.log('Individual clear completed');
+      } catch (individualError) {
+        console.error('Individual clear also failed:', individualError);
+      }
     }
-  };  const login = async (email: string, password: string) => {
+  };const login = async (email: string, password: string) => {
     try {
       const response = await apiService.login({ email, password });
       
@@ -111,21 +122,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       throw error;
     }
-  };
-
-  const logout = async () => {
+  };  const logout = async () => {
     try {
-      // Call backend logout endpoint if needed
-      // await apiService.logout(accessToken);
+      console.log('Starting logout process...');
+      
+      // Call backend logout endpoint if we have a token
+      if (accessToken) {
+        console.log('Calling backend logout API...');
+        try {
+          await apiService.logout(accessToken);
+          console.log('Backend logout successful');
+        } catch (apiError) {
+          console.error('Backend logout failed:', apiError);
+          // Continue with local logout even if backend call fails
+        }
+      }
       
       // Clear local storage
+      console.log('Clearing auth data...');
       await clearAuthData();
       
       // Reset state
+      console.log('Resetting state...');
       setUser(null);
       setAccessToken(null);
+      
+      console.log('Logout completed, navigating to login...');
+      // Navigate to login screen
+      router.replace('/(auth)/login' as any);
     } catch (error) {
       console.error('Error during logout:', error);
+      // Even if there's an error, still try to clear state and navigate
+      setUser(null);
+      setAccessToken(null);
+      router.replace('/(auth)/login' as any);
     }
   };
 

@@ -179,7 +179,6 @@ class ApiService {
 
     return data;
   }
-
   async refreshToken(refreshToken: string) {
     const { response, data } = await this.makeRequest('/auth/refresh-token', {
       method: 'POST',
@@ -188,6 +187,21 @@ class ApiService {
 
     if (!response.ok) {
       throw new Error(data.message || 'Token refresh failed');
+    }
+
+    return data;
+  }
+
+  async logout(token: string) {
+    const { response, data } = await this.makeRequest('/auth/logout', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Logout failed');
     }
 
     return data;
